@@ -50,6 +50,8 @@ Classes: `MWG` (Mage Warrior God) and others defined by the server.
 ## Client
 
 ```powershell
+# permission:
+# Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 .\run-client.ps1 -User Ishtar -Password secret                   # connect to localhost
 .\run-client.ps1 -User Ishtar -Password secret -Server 1.2.3.4   # connect to a remote server
 .\run-client.ps1                                                   # reuse saved credentials
