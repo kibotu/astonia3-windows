@@ -1,0 +1,54 @@
+name: Build + pretty-check
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Enable i386 architecture
+        run: |
+          sudo dpkg --add-architecture i386
+
+      - name: Add LLVM apt repository (clang-format 21)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release software-properties-common
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/llvm.asc > /dev/null
+          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-21 main"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            make \
+            gcc-multilib \
+            zlib1g-dev \
+            lib32z1-dev \
+            libargon2-dev:i386 \
+            libmysqlclient-dev:i386 \
+            clang-format-21
+
+      - name: Force clang-format 21 (PATH wrapper)
+        run: |
+          cat > clang-format <<'EOF'
+          #!/usr/bin/env sh
+          exec /usr/bin/clang-format-21 "$@"
+          EOF
+          chmod +x clang-format
+          echo "$GITHUB_WORKSPACE" >> "$GITHUB_PATH"
+          
+      - name: Pretty check
+        run: make pretty-check
+
+      - name: Build
+        run: make
+        

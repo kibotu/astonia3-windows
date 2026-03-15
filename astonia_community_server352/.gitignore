@@ -1,0 +1,14 @@
+chatserver
+create_account
+create_character
+motd.txt
+runtime/
+server35
+v3.*
+*.ilog
+*.elog
+*.log
+*.o
+*.d
+.serverkey
+accman/var
