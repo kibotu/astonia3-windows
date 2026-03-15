@@ -120,6 +120,22 @@ function Find-Msys2 {
     return $null
 }
 
+function Install-Msys2 {
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        Log 'MSYS2 not found - installing via winget (required to build the client) ...'
+        & winget install -e --id MSYS2.MSYS2 --accept-source-agreements --accept-package-agreements
+        if ($LASTEXITCODE -eq 0) {
+            Log 'MSYS2 installed. Please close and re-open your terminal, then re-run this script.'
+            exit 0
+        }
+    }
+    Err 'MSYS2 is required to build the client but was not found.'
+    Write-Host ''
+    Write-Host '  Install it either by re-running this script (if winget is available) or manually from https://www.msys2.org/'
+    Write-Host '  Then re-run this script.'
+    exit 1
+}
+
 # Path to MSYS2 Clang64 bin (for runtime DLLs: libpng, SDL3, etc.). Used when launching the game.
 function Get-Msys2Clang64Bin {
     $msys2 = Find-Msys2
@@ -161,10 +177,7 @@ function Install-Msys2ClientDeps {
 function Invoke-ClientBuild {
     $msys2 = Find-Msys2
     if (-not $msys2) {
-        Err 'MSYS2 is required to build the client but was not found.'
-        Write-Host ''
-        Write-Host '  Install MSYS2 from https://www.msys2.org/ then re-run this script.'
-        exit 1
+        Install-Msys2
     }
 
     if (-not (Test-Msys2ClientReady $msys2)) {
